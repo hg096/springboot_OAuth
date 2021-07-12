@@ -30,33 +30,38 @@ spring:
     oauth2:
       client:
         registration:
+        # https://console.cloud.google.com/apis/credentials/
+        # oauth동의 화면과 사용자 인증정보 oauth 클라이언트 아이디 생성 -> 승인된 리디렉션 URI -> 
+        # http://~~~/login/oauth2/code/~~~ <물결을 제외하고 고정값>
           google: # /oauth2/authorization/google 이 주소를 동작하게 한다.
-            client-id: 머시기
-            client-secret: 머시기
+            client-id: ---
+            client-secret: ---
             scope:
             - email
             - profile
             
+        # https://developers.facebook.com/apps 
           facebook:
-            client-id: 머시기
-            client-secret: 머시기
+            client-id: ---
+            client-secret: ---
             scope:
             - email
             - public_profile
           
+          # https://developers.naver.com/apps/#/myapps
           # 네이버는 OAuth2.0 공식 지원대상이 아니라서 provider 설정이 필요하다.
           # 요청주소도 다르고, 응답 데이터도 다르기 때문이다.
           naver:
-            client-id: 머시기
-            client-secret: 머시기
+            client-id: ---
+            client-secret: ---
             scope:
             - name
             - email
             - profile_image
             client-name: Naver # 클라이언트 네임은 구글 페이스북도 대문자로 시작하더라.
-            authorization-grant-type: authorization_code
+            authorization-grant-type: authorization_code #코드방식 
             redirect-uri: http://localhost:8080/login/oauth2/code/naver
-
+        # 네이버 프로바이더 추가  https://developers.naver.com/docs/login/devguide/devguide.md
         provider:
           naver:
             authorization-uri: https://nid.naver.com/oauth2.0/authorize

@@ -2,10 +2,12 @@ package com.cos.securityex01.config.oauth.provider;
 
 import java.util.Map;
 
+
 public class NaverUserInfo implements OAuth2UserInfo{
 
 	private Map<String, Object> attributes;
 	
+	// attributes = {id=---,email=---, name=---}
     public NaverUserInfo(Map<String, Object> attributes) {
         this.attributes = attributes;
     }

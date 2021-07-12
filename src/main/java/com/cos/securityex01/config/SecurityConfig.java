@@ -1,5 +1,9 @@
 package com.cos.securityex01.config;
 
+// 1.코드받기(인증) 2.엑세스토큰(권한) 
+// 3.사용자프로필 정보를 가져옴 4.회원가입을 자동으로 진행
+// 4-2. (이메일, 전회번호, 이름, 아이디)쇼핑몰 -> (집주소),백화점몰 -> (vip등급, 일반등급)
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,9 +45,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 			.defaultSuccessUrl("/")
 		.and()
 			.oauth2Login()
-			.loginPage("/login")
+			.loginPage("/login") // 구글 로그인이 완료된 뒤의 후처리 필요 tip 코드x (엑세스토큰, 사용자프로필정보o)
 			.userInfoEndpoint()
-			.userService(principalOauth2UserService);
+			.userService(principalOauth2UserService); //후처리 던지는곳 
 	}
 }
 

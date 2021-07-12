@@ -4,9 +4,12 @@ import java.util.Iterator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,21 +29,40 @@ public class IndexController {
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@GetMapping({ "", "/" })
-	public @ResponseBody String index() {
-		return "인덱스 페이지입니다.";
+	public String index() {
+		return "index";
 	}
 
+	@GetMapping("test/login")
+	public @ResponseBody String testLogin(Authentication authentication,
+			@AuthenticationPrincipal PrincipalDetails userDetails) { // DI(의존성 주입)
+		System.out.println("test/login================");
+		PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+		System.out.println("authentication: " + principalDetails.getUser());
+		System.out.println("userDetails: " + userDetails.getUser());
+		return "세션정보 확인";
+	}
+	@GetMapping("test/oauth/login")
+	public @ResponseBody String testOAuthLogin(Authentication authentication,
+			@AuthenticationPrincipal OAuth2User oAuth) { // DI(의존성 주입)
+		System.out.println("test/oauth/login================");
+		OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+		System.out.println("authentication: " + oAuth2User.getAttributes());
+		System.out.println("oauth2User: " + oAuth.getAttributes());
+		return "OAuth 세션정보 확인";
+	}
+	
+	// OAuth 로그인과 일반 로그인을 해도 PrincipalDetails
 	@GetMapping("/user")
 	public @ResponseBody String user(@AuthenticationPrincipal PrincipalDetails principal) {
 		System.out.println("Principal : " + principal);
-		System.out.println("OAuth2 : "+principal.getUser().getProvider());
+		System.out.println("OAuth2 : " + principal.getUser().getProvider());
 		// iterator 순차 출력 해보기
 		Iterator<? extends GrantedAuthority> iter = principal.getAuthorities().iterator();
 		while (iter.hasNext()) {
 			GrantedAuthority auth = iter.next();
 			System.out.println(auth.getAuthority());
 		}
-
 		return "유저 페이지입니다.";
 	}
 
@@ -48,9 +70,9 @@ public class IndexController {
 	public @ResponseBody String admin() {
 		return "어드민 페이지입니다.";
 	}
-	
-	//@PostAuthorize("hasRole('ROLE_MANAGER')")
-	//@PreAuthorize("hasRole('ROLE_MANAGER')")
+
+	// @PostAuthorize("hasRole('ROLE_MANAGER')")
+	// @PreAuthorize("hasRole('ROLE_MANAGER')")
 	@Secured("ROLE_MANAGER")
 	@GetMapping("/manager")
 	public @ResponseBody String manager() {

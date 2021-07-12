@@ -24,16 +24,22 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 	@Autowired
 	private UserRepository userRepository;
 
+	// 여기서 후처리 <구글로부터 받은 userRequest 데이터에 대한 후처리되는 함수>
+	// 함수종료시 @AuthenticationPrincipal 어노테이션이 만들어진다
 	// userRequest 는 code를 받아서 accessToken을 응답 받은 객체
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 		OAuth2User oAuth2User = super.loadUser(userRequest); // google의 회원 프로필 조회
-
-		// code를 통해 구성한 정보
+		/*
+		 * 구글로그인 버튼 클릭 -> 구글로그인창 -> 로그인 완료 -> code를 리턴(OAuth-Client라이브러리) -> AccessToken요청
+		 * userRequest 정보 -> 회원프로필 받아야함(loadUser함수 호출) -> 구글로부터 회원프로필받기
+		 */
+		// code를 통해 구성한 정보 RegistrationId로 어떤 OAuth로 로그인했는지 확인
 		System.out.println("userRequest clientRegistration : " + userRequest.getClientRegistration());
 		// token을 통해 응답받은 회원정보
 		System.out.println("oAuth2User : " + oAuth2User);
-	
+		
+		// 회원가입을 강제로 진행
 		return processOAuth2User(userRequest, oAuth2User);
 	}
 
@@ -47,18 +53,20 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 		} else if (userRequest.getClientRegistration().getRegistrationId().equals("facebook")) {
 			System.out.println("페이스북 로그인 요청~~");
 			oAuth2UserInfo = new FaceBookUserInfo(oAuth2User.getAttributes());
-		} else if (userRequest.getClientRegistration().getRegistrationId().equals("naver")){
+		} else if (userRequest.getClientRegistration().getRegistrationId().equals("naver")) {
 			System.out.println("네이버 로그인 요청~~");
-			oAuth2UserInfo = new NaverUserInfo((Map)oAuth2User.getAttributes().get("response"));
+			oAuth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("response"));
 		} else {
-			System.out.println("우리는 구글과 페이스북만 지원해요 ㅎㅎ");
+			System.out.println("우리는 구글, 페이스북, 네이버만 지원");
 		}
 
-		//System.out.println("oAuth2UserInfo.getProvider() : " + oAuth2UserInfo.getProvider());
-		//System.out.println("oAuth2UserInfo.getProviderId() : " + oAuth2UserInfo.getProviderId());
-		Optional<User> userOptional = 
-				userRepository.findByProviderAndProviderId(oAuth2UserInfo.getProvider(), oAuth2UserInfo.getProviderId());
-		
+		// System.out.println("oAuth2UserInfo.getProvider() : " +
+		// oAuth2UserInfo.getProvider());
+		// System.out.println("oAuth2UserInfo.getProviderId() : " +
+		// oAuth2UserInfo.getProviderId());
+		Optional<User> userOptional = userRepository.findByProviderAndProviderId(oAuth2UserInfo.getProvider(),
+				oAuth2UserInfo.getProviderId());
+
 		User user;
 		if (userOptional.isPresent()) {
 			user = userOptional.get();
@@ -67,7 +75,8 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 			userRepository.save(user);
 		} else {
 			// user의 패스워드가 null이기 때문에 OAuth 유저는 일반적인 로그인을 할 수 없음.
-			user = User.builder()
+			user = User
+					.builder()
 					.username(oAuth2UserInfo.getProvider() + "_" + oAuth2UserInfo.getProviderId())
 					.email(oAuth2UserInfo.getEmail())
 					.role("ROLE_USER")

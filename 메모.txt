@@ -1,0 +1,4 @@
+사큐리티 세션 >> authentication >> userDetails<일반로그인>, OAuth2User<OAuth로그인>
+
+userDetails<일반로그인>, OAuth2User<OAuth로그인>을 PrincipalDetails로 묶어서 처리해서 두가지 상황에 맞게 사용 할 필요없이 PrincipalDetails만 사용하면됨
+
